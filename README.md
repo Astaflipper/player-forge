@@ -1,14 +1,16 @@
 # PLAYER FORGE — RPG Character Sheet v7.33
 
-Sistema local e genérico de fichas de RPG com um save portátil por personagem.
+Sistema local e genérico de fichas para o meu grupo de RPG com um save portátil por personagem.
+
+VOCÊ PRECISA BAIXAR O NODE.JS PARA QUE O PLAYER FORGE FUNCIONE
 
 ## Abrir
 
 1. Extraia a pasta.
 2. Abra a pasta `player-forge`.
-3. Abra o PowerShell nessa pasta.
+3. Abra o PowerShell nessa pasta. (clique com o mouse na barra digitável no topo dos arquivos (provavelmente estará algo como "Downloads > Player.Forge.v7.33", apenas digite "powershell" e aperte enter)
 4. Rode `node server.js`.
-5. Acesse `http://localhost:3000`.
+5. Acesse no seu navegador `http://localhost:3000`.
 
 ## Save portátil
 
@@ -22,6 +24,8 @@ save/
 ```
 
 Sem a pasta `save`, o servidor cria uma ficha vazia automaticamente.
+Após cada alteração, a pasta save guardará automaticamente as informações do personagem, faça sempre um backup.
+Em caso de atualização de versão, copie sua pasta de SAVE para a nova versão, suas informações serão transferidas
 
 ## v7.3
 
