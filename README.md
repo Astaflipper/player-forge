@@ -9,7 +9,7 @@ VOCÊ PRECISA BAIXAR O NODE.JS PARA QUE O PLAYER FORGE FUNCIONE
 1. Extraia a pasta.
 2. Abra a pasta `player-forge`.
 3. Abra o PowerShell nessa pasta. (clique com o mouse na barra digitável no topo dos arquivos (provavelmente estará algo como "Downloads > Player.Forge.v7.33", apenas digite "powershell" e aperte enter)
-4. Rode `node server.js`.
+4. Rode `node server.js`. (Digite isso e aperte enter)
 5. Acesse no seu navegador `http://localhost:3000`.
 
 ## Save portátil
