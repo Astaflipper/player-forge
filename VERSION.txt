@@ -1,0 +1,6 @@
+PLAYER FORGE — v7.33
+
+- Painéis de Magias | Particularidades e Rituais com rolagem própria; cada registro também possui rolagem interna.
+- Descrição, Capacidades e Efeitos de Status em seções independentes expansíveis (Rituais: Descrição e Capacidades).
+- Distribuição LIMPA: ficha em branco, nenhum dado nem imagem de personagem pré-carregados.
+- Compatível com a pasta save/ de versões anteriores.

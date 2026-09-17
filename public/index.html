@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Player Forge RPG Character Sheet</title>
+  <link rel="stylesheet" href="styles.css?v=player-forge-v733-altura-ampliada">
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <div id="floatingVitals" class="floating-vitals" aria-label="Vida atual fixa">
+    <div class="floating-life-copy">
+      <span>VIDA</span>
+      <strong id="floatingLifeValue">0/0</strong>
+    </div>
+    <div class="floating-life-track">
+      <div id="floatingLifeBar" class="floating-life-fill"></div>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <header id="heroHeader" class="hero panel">
+      <div class="brand-banner" aria-label="Player Forge">
+        <div class="brand-logo" role="img" aria-label="Player Forge RPG Character Sheet">
+          <span class="brand-main">PLAYER FORGE</span>
+          <span class="brand-sub">RPG Character Sheet</span>
+        </div>
+      </div>
+
+      <div class="hero-main">
+        <div class="hero-copy">
+          <h1 id="titleText"></h1>
+          <h2 id="subtitleText"></h2>
+          <p id="descriptionText" class="description"></p>
+        </div>
+
+        <div class="hero-vitals" aria-label="Vida atual do personagem">
+          <div class="top-life-wrap">
+            <div class="top-life-label">
+              <span>VIDA</span>
+              <strong id="topLifeValue">0/0</strong>
+            </div>
+            <div class="top-life-track" aria-hidden="true">
+              <div id="topLifeBar" class="top-life-fill"></div>
+            </div>
+          </div>
+          <div class="profile-frame">
+            <img id="profileImage" src="assets/profile-placeholder.svg" alt="Retrato do personagem">
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <button class="tab-button active" data-tab="overview">Visão geral</button>
+        <button class="tab-button" data-tab="editor">Editar ficha</button>
+        <button class="tab-button" data-tab="allies">Aliados</button>
+        <button class="tab-button" data-tab="enemies">Inimigos</button>
+        <button id="themeButton" class="theme-button" type="button" aria-label="Personalizar cores do tema" title="Personalizar cores do tema">
+          <span class="theme-button-rgb" aria-hidden="true"></span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section id="overview" class="tab-panel active">
+        <div class="grid-two top-grid">
+          <div class="panel status-panel">
+            <div class="metrics">
+              <div class="metric-card">
+                <span>Vida</span>
+                <strong id="lifeValue">0 / 0</strong>
+                <div class="bar"><div id="lifeBar" class="bar-fill life"></div></div>
+              </div>
+              <div class="metric-card">
+                <span>Energia</span>
+                <strong id="energyValue">0 / 0</strong>
+                <div class="bar"><div id="energyBar" class="bar-fill energy"></div></div>
+              </div>
+            </div>
+
+            <div class="armor-line">
+              <div><span>Armadura Total</span><strong id="armorTotal">0</strong></div>
+              <div><span>Pele</span><strong id="armorSkin">0</strong></div>
+              <div><span>Armadura</span><strong id="armorGear">0</strong></div>
+            </div>
+
+            <div class="realtime-combat-box">
+              <div class="panel-title-row combat-title-row">
+                <h3>Combate em tempo real</h3>
+                <span class="combat-live-dot">AO VIVO</span>
+              </div>
+
+              <div class="combat-control-block combat-damage-block">
+                <div class="combat-damage-line">
+                  <label class="combat-damage-field" for="damageInput">
+                    <span>Dano bruto</span>
+                    <input id="damageInput" type="number" min="0" placeholder="Dano">
+                  </label>
+
+                  <div class="combat-damage-options" aria-label="Opções do cálculo de dano">
+                    <label class="combat-check-option">
+                      <input id="considerArmor" type="checkbox" checked>
+                      <span>Considerar Armadura</span>
+                    </label>
+                    <label class="combat-check-option">
+                      <input id="considerResistance" type="checkbox" checked>
+                      <span>Considerar Resistência Celestial</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div id="damagePreview" class="preview-card compact-preview combat-auto-preview" hidden></div>
+
+                <div class="input-row combat-damage-actions">
+                  <button id="applyDamageBtn" class="primary">Aplicar dano</button>
+                  <button id="fullLifeBtn" class="full-life-button" type="button">Full Life</button>
+                </div>
+              </div>
+
+              <div class="combat-mini-grid">
+                <div class="combat-control-block">
+                  <label>Vida curada</label>
+                  <div class="input-row compact-stack">
+                    <input id="healInput" type="number" min="0" placeholder="Cura">
+                    <button id="applyHealBtn" class="primary">Aplicar cura</button>
+                  </div>
+                </div>
+
+                <div class="combat-control-block">
+                  <label>Ajuste de energia</label>
+                  <div class="input-row compact-stack">
+                    <input id="energyInput" type="number" placeholder="-10 ou +10">
+                    <button id="applyEnergyBtn">Atualizar</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="combat-log-inline">
+                <div class="panel-title-row">
+                  <strong>Histórico</strong>
+                  <button id="clearLogBtn" class="small-button">Limpar</button>
+                </div>
+                <div id="logList" class="log-list compact-log"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="overview-side-stack">
+            <aside class="panel inventory-shell magic-shell">
+              <button id="magicToggle" class="inventory-toggle" aria-expanded="false">
+                <span class="inventory-title-wrap">
+                  <span class="inventory-symbol">✦</span>
+                  <span>MAGIAS | PARTICULARIDADES</span>
+                </span>
+                <span class="inventory-toggle-right">
+                  <small id="magicCount">0</small>
+                  <span class="chevron">⌄</span>
+                </span>
+              </button>
+              <div id="magicBody" class="inventory-body" hidden>
+                <div id="magicList" class="inventory-list"></div>
+              </div>
+            </aside>
+
+            <aside class="panel inventory-shell ritual-shell">
+              <button id="ritualToggle" class="inventory-toggle" type="button" aria-expanded="false">
+                <span class="inventory-title-wrap">
+                  <span class="inventory-symbol">✧</span>
+                  <span>RITUAIS</span>
+                </span>
+                <span class="inventory-toggle-right">
+                  <small id="ritualCount">0</small>
+                  <span class="chevron">⌄</span>
+                </span>
+              </button>
+              <div id="ritualBody" class="inventory-body" hidden>
+                <div id="ritualList" class="inventory-list"></div>
+              </div>
+            </aside>
+
+            <aside class="panel inventory-shell">
+              <button id="inventoryToggle" class="inventory-toggle" aria-expanded="false">
+                <span class="inventory-title-wrap">
+                  <span class="inventory-symbol">◆</span>
+                  <span>INVENTÁRIO</span>
+                </span>
+                <span class="inventory-toggle-right">
+                  <small id="inventoryCount">0 ITENS</small>
+                  <span class="chevron">⌄</span>
+                </span>
+              </button>
+              <div id="inventoryBody" class="inventory-body" hidden>
+                <div id="inventoryList" class="inventory-list"></div>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <div class="grid-three">
+          <div class="panel">
+            <h3>Ataques / Magias</h3>
+            <div id="attacksList" class="stack"></div>
+          </div>
+          <div class="panel">
+            <h3>Atributos básicos</h3>
+            <div id="basicList" class="attribute-list"></div>
+            <h3 class="section-spacer">Atributos extra</h3>
+            <div id="extraList" class="attribute-list"></div>
+          </div>
+          <div class="panel">
+            <h3>Passivas</h3>
+            <ul id="passivesList" class="pill-list"></ul>
+            <h3 class="section-spacer">Traumas</h3>
+            <ul id="traumasList" class="pill-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="editor" class="tab-panel">
+        <div class="panel">
+          <div class="panel-title-row">
+            <h3>Editor completo da ficha</h3>
+            <button id="saveAllBtn" class="primary">Salvar ficha</button>
+          </div>
+          <p class="editor-help">Todas as informações deste personagem ficam no save portátil em <code>save/character.json</code>; imagens adicionadas ficam em <code>save/uploads</code>. Sem uma pasta <code>save</code>, o Player Forge cria uma ficha vazia automaticamente.</p>
+
+          <div class="editor-grid">
+            <label>Título<input id="editTitle" type="text"></label>
+            <label>Nome do personagem<input id="editName" type="text"></label>
+            <label>Subtítulo<input id="editSubtitle" type="text"></label>
+            <label class="full-width">Frase do cabeçalho<textarea id="editDescription" rows="2"></textarea></label>
+
+            <div id="profileImageEditor" class="full-width profile-edit-block">
+              <div class="profile-edit-thumb"><img id="editProfilePreview" src="assets/profile-placeholder.svg" alt="Prévia da imagem de perfil"></div>
+              <div class="profile-edit-fields">
+                <label>Imagem de perfil<input id="editProfileImageFile" type="file" accept="image/png,image/jpeg,image/webp"></label>
+                <input id="editProfileImage" type="hidden">
+                <small id="editProfileUploadStatus" class="upload-status">Nenhuma imagem cadastrada.</small>
+              </div>
+            </div>
+
+            <label>Vida atual<input id="editLifeCurrent" type="number" min="0"></label>
+            <label>Vida máxima<input id="editLifeMax" type="number" min="0"></label>
+            <label>Energia atual<input id="editEnergyCurrent" type="number" min="0"></label>
+            <label>Energia máxima<input id="editEnergyMax" type="number" min="0"></label>
+            <label>Armadura total<input id="editArmorTotal" type="number" min="0"></label>
+            <label>Armadura da pele<input id="editArmorSkin" type="number" min="0"></label>
+            <label>Armadura do equipamento<input id="editArmorGear" type="number" min="0"></label>
+          </div>
+        </div>
+
+        <div class="panel editor-sections inventory-editor-panel">
+          <div class="panel-title-row">
+            <h3>Magias | Particularidades</h3>
+            <button id="addMagicBtn">Adicionar</button>
+          </div>
+          <div id="editMagicList" class="inventory-editor-list"></div>
+        </div>
+
+        <div class="panel editor-sections inventory-editor-panel">
+          <div class="panel-title-row">
+            <h3>Rituais</h3>
+            <button id="addRitualBtn" type="button">Adicionar ritual</button>
+          </div>
+          <div id="editRitualList" class="inventory-editor-list"></div>
+        </div>
+
+        <div class="panel editor-sections inventory-editor-panel">
+          <div class="panel-title-row">
+            <h3>Inventário</h3>
+            <button id="addInventoryBtn">Adicionar item</button>
+          </div>
+          <div id="editInventoryList" class="inventory-editor-list"></div>
+        </div>
+
+        <div class="grid-two editor-sections">
+          <div class="panel">
+            <div class="panel-title-row"><h3>Ataques / magias</h3><button id="addAttackBtn">Adicionar</button></div>
+            <div id="editAttacksList" class="editable-list"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title-row"><h3>Atributos básicos</h3><button id="addBasicBtn">Adicionar</button></div>
+            <div id="editBasicList" class="editable-list"></div>
+            <div class="panel-title-row section-spacer"><h3>Atributos extra</h3><button id="addExtraBtn">Adicionar</button></div>
+            <div id="editExtraList" class="editable-list"></div>
+          </div>
+        </div>
+
+        <div class="grid-two editor-sections">
+          <div class="panel">
+            <div class="panel-title-row"><h3>Passivas</h3><button id="addPassiveBtn">Adicionar</button></div>
+            <div id="editPassivesList" class="editable-list"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title-row"><h3>Traumas</h3><button id="addTraumaBtn">Adicionar</button></div>
+            <div id="editTraumasList" class="editable-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="allies" class="tab-panel">
+        <div class="panel roster-panel">
+          <div class="panel-title-row roster-title-row">
+            <div>
+              <p class="roster-kicker">RELAÇÕES</p>
+              <h3>Aliados</h3>
+              <p class="roster-help">Até cinco retratos por linha. Clique em um aliado para abrir a ficha dele.</p>
+            </div>
+            <button id="addAllyBtn" class="primary" type="button">+ Adicionar aliado</button>
+          </div>
+          <div id="alliesGrid" class="roster-grid"></div>
+        </div>
+      </section>
+
+      <section id="enemies" class="tab-panel">
+        <div class="panel roster-panel enemy-roster-panel">
+          <div class="panel-title-row roster-title-row">
+            <div>
+              <p class="roster-kicker">AMEAÇAS</p>
+              <h3>Inimigos</h3>
+              <p class="roster-help">O status aparece abaixo de cada retrato e pode ser atualizado a qualquer momento.</p>
+            </div>
+            <button id="addEnemyBtn" class="primary" type="button">+ Adicionar inimigo</button>
+          </div>
+          <div id="enemiesGrid" class="roster-grid"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="attackEditorTemplate">
+    <article class="edit-card attack-edit-card">
+      <div class="attack-edit-head">
+        <div class="attack-edit-thumb"><img data-field="previewImage" alt="Prévia da habilidade"></div>
+        <div class="attack-edit-fields">
+          <div class="mini-grid">
+            <label>Nome<input data-field="name" type="text"></label>
+            <label>Rolagem<input data-field="roll" type="text"></label>
+            <label>Bônus<input data-field="bonus" type="number"></label>
+          </div>
+          <label>Imagem da habilidade<input data-field="previewFile" type="file" accept="image/png,image/jpeg,image/webp"></label>
+          <input data-field="preview" type="hidden">
+          <small data-field="uploadStatus" class="upload-status">Nenhuma imagem cadastrada.</small>
+        </div>
+        <button class="danger remove-item">Remover</button>
+      </div>
+      <label>Anotações<textarea data-field="notes" rows="2"></textarea></label>
+    </article>
+  </template>
+
+  <template id="pairEditorTemplate">
+    <div class="edit-card inline-edit-card">
+      <label>Nome<input data-field="name" type="text"></label>
+      <label>Valor<input data-field="value" type="text"></label>
+      <button class="danger remove-item">Remover</button>
+    </div>
+  </template>
+
+  <template id="textEditorTemplate">
+    <div class="edit-card inline-edit-card text-edit-card">
+      <label class="full-width">Texto<textarea data-field="value" rows="2"></textarea></label>
+      <button class="danger remove-item">Remover</button>
+    </div>
+  </template>
+
+  <template id="magicEditorTemplate">
+    <article class="inventory-edit-card magic-edit-card" data-magic-id="">
+      <div class="inventory-edit-head">
+        <div class="inventory-edit-preview"><img data-field="preview" alt="Prévia"></div>
+        <div class="inventory-edit-title-fields">
+          <label>Título<input data-field="title" type="text"></label>
+          <label>Imagem<input data-field="imageFile" type="file" accept="image/png,image/jpeg,image/webp"></label>
+          <input data-field="image" type="hidden">
+          <small data-field="uploadStatus" class="upload-status">Nenhuma imagem cadastrada.</small>
+        </div>
+        <button class="danger remove-magic">Remover</button>
+      </div>
+      <label class="magic-description-field">Descrição<textarea data-field="description" class="magic-main-description" rows="6"></textarea></label>
+      <details class="magic-editor-section" data-group="abilities">
+        <summary>CAPACIDADES <span class="magic-editor-count" data-count="abilities">0</span></summary>
+        <div class="magic-editor-section-body">
+          <div class="magic-abilities-editor" data-magic-abilities></div>
+          <button type="button" class="add-magic-ability">+ Habilidade</button>
+        </div>
+      </details>
+      <details class="magic-editor-section" data-group="statuses">
+        <summary>EFEITOS DE STATUS <span class="magic-editor-count" data-count="statuses">0</span></summary>
+        <div class="magic-editor-section-body">
+          <div class="magic-statuses-editor" data-magic-statuses></div>
+          <button type="button" class="add-magic-status">+ Efeito</button>
+        </div>
+      </details>
+    </article>
+  </template>
+
+  <template id="magicAbilityTemplate">
+    <article class="magic-subedit-card magic-ability-edit-card">
+      <div class="magic-subedit-fields">
+        <label>Título<input type="text" class="magic-ability-title"></label>
+        <label>Valor (opcional)<textarea class="magic-ability-value" rows="2" placeholder="Valor (opcional)"></textarea></label>
+      </div>
+      <label>Descrição<textarea class="magic-ability-description" rows="3"></textarea></label>
+      <button type="button" class="danger magic-subedit-remove remove-magic-ability">Remover habilidade</button>
+    </article>
+  </template>
+
+  <template id="magicStatusTemplate">
+    <article class="magic-subedit-card magic-status-edit-card">
+      <div class="magic-subedit-heading">
+        <label>Título do efeito<input type="text" class="magic-status-title" placeholder="Nome do efeito"></label>
+        <button type="button" class="danger remove-magic-status">Remover efeito</button>
+      </div>
+      <div class="magic-stacks-editor"></div>
+      <button type="button" class="add-magic-stack">+ Stack</button>
+    </article>
+  </template>
+
+  <template id="magicStackTemplate">
+    <div class="magic-stack-edit-row">
+      <label>Stack<input type="text" class="magic-stack-label" placeholder="Identificação"></label>
+      <label>Efeito / dano<textarea class="magic-stack-effect" rows="2" placeholder="Descrição do efeito"></textarea></label>
+      <button type="button" class="danger remove-magic-stack" aria-label="Remover stack">×</button>
+    </div>
+  </template>
+
+  <template id="ritualEditorTemplate">
+    <article class="inventory-edit-card ritual-edit-card" data-ritual-id="">
+      <div class="inventory-edit-head">
+        <div class="inventory-edit-preview"><img data-field="preview" alt="Prévia do ritual"></div>
+        <div class="inventory-edit-title-fields">
+          <label>Título<input data-field="title" type="text" placeholder="Título do ritual"></label>
+          <label>Imagem (opcional)<input data-field="imageFile" type="file" accept="image/png,image/jpeg,image/webp"></label>
+          <input data-field="image" type="hidden">
+          <small data-field="uploadStatus" class="upload-status">Nenhuma imagem cadastrada.</small>
+        </div>
+        <button type="button" class="danger remove-ritual">Remover</button>
+      </div>
+      <label class="magic-description-field">Descrição<textarea class="ritual-main-description" rows="5"></textarea></label>
+      <details class="magic-editor-section" data-group="capacities">
+        <summary>CAPACIDADES <span class="magic-editor-count" data-count="capacities">0</span></summary>
+        <div class="magic-editor-section-body">
+          <div class="ritual-capacities-editor" data-ritual-capacities></div>
+          <button type="button" class="add-ritual-capacity">+ Capacidade</button>
+        </div>
+      </details>
+    </article>
+  </template>
+
+  <template id="ritualCapacityTemplate">
+    <article class="magic-subedit-card ritual-capacity-edit-card">
+      <div class="magic-subedit-fields">
+        <label>Título<input type="text" class="ritual-capacity-title" placeholder="Título da capacidade"></label>
+        <label>Custo<textarea class="ritual-capacity-cost" rows="2" placeholder="Custo (opcional)"></textarea></label>
+      </div>
+      <label class="ritual-effect-field">Efeito<textarea class="ritual-capacity-effect" rows="3"></textarea></label>
+      <button type="button" class="danger magic-subedit-remove remove-ritual-capacity">Remover capacidade</button>
+    </article>
+  </template>
+
+  <template id="inventoryEditorTemplate">
+    <article class="inventory-edit-card" data-inventory-id="">
+      <div class="inventory-edit-head">
+        <div class="inventory-edit-preview"><img data-field="preview" alt="Prévia do item"></div>
+        <div class="inventory-edit-title-fields">
+          <label>Título do item<input data-field="title" type="text" placeholder="Título do item"></label>
+          <label>Imagem do item<input data-field="imageFile" type="file" accept="image/png,image/jpeg,image/webp"></label>
+          <input data-field="image" type="hidden">
+          <small data-field="uploadStatus" class="upload-status">Nenhuma nova imagem selecionada.</small>
+        </div>
+        <button class="danger remove-inventory">Remover item</button>
+      </div>
+
+      <div class="inventory-edit-section">
+        <div class="panel-title-row"><h4>Atributos</h4><button class="add-inventory-attribute">Adicionar atributo</button></div>
+        <div data-field="attributes" class="inventory-attribute-editor"></div>
+      </div>
+
+      <div class="inventory-text-grid">
+        <label>VANTAGENS<textarea data-field="advantages" rows="5"></textarea></label>
+        <label>DESVANTAGENS<textarea data-field="disadvantages" rows="5"></textarea></label>
+        <label class="full-width">INFO / LORE<textarea data-field="info" rows="7"></textarea></label>
+      </div>
+    </article>
+  </template>
+
+  <template id="inventoryAttributeTemplate">
+    <div class="inventory-attribute-edit">
+      <input data-field="name" type="text" placeholder="Atributo">
+      <input data-field="value" type="text" placeholder="Valor">
+      <button class="danger remove-inventory-attribute">×</button>
+    </div>
+  </template>
+
+
+  <div id="personModal" class="person-modal" hidden>
+    <div class="person-modal-backdrop" data-person-close></div>
+    <section class="person-dialog" role="dialog" aria-modal="true" aria-labelledby="personDialogTitle">
+      <div class="person-dialog-head">
+        <div>
+          <p id="personTypeLabel" class="roster-kicker">ALIADO</p>
+          <h2 id="personDialogTitle">Novo aliado</h2>
+          <span id="personViewStatus" class="enemy-status person-view-status" hidden></span>
+        </div>
+        <button id="personCloseButton" class="theme-close-button" type="button" aria-label="Fechar">×</button>
+      </div>
+
+      <div class="person-detail-layout">
+        <div class="person-large-image-wrap">
+          <img id="personPreviewImage" src="assets/profile-placeholder.svg" alt="Retrato">
+        </div>
+        <div class="person-fields">
+          <label class="person-edit-only">Nome<input id="personNameInput" type="text" maxlength="100"></label>
+          <label id="personStatusLabel" class="person-edit-only">Status
+            <select id="personStatusInput">
+              <option value="vivo">Vivo</option>
+              <option value="provavelmente vivo">Provavelmente vivo</option>
+              <option value="morto">Morto</option>
+              <option value="provavelmente morto">Provavelmente morto</option>
+              <option value="desconhecido">Desconhecido</option>
+            </select>
+          </label>
+          <label id="personImageFileLabel" class="person-edit-only">Imagem<input id="personImageFile" type="file" accept="image/png,image/jpeg,image/webp"></label>
+          <input id="personImagePath" type="hidden">
+          <small id="personUploadStatus" class="upload-status person-edit-only"></small>
+          <div id="personViewDescription" class="person-view-description"></div>
+          <label class="person-edit-only">Descrição<textarea id="personDescriptionInput" rows="9" placeholder="Descrição, relação, habilidades, história..."></textarea></label>
+        </div>
+      </div>
+
+      <div class="person-dialog-actions">
+        <div>
+          <button id="personDeleteButton" class="danger" type="button">Excluir</button>
+        </div>
+        <div class="person-dialog-actions-right">
+          <button id="personEditButton" type="button">Editar</button>
+          <button id="personCancelButton" type="button">Cancelar</button>
+          <button id="personSaveButton" class="primary" type="button">Salvar</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+
+  <div id="themeModal" class="theme-modal" hidden>
+    <div class="theme-modal-backdrop" data-theme-close></div>
+    <section class="theme-dialog" role="dialog" aria-modal="true" aria-labelledby="themeDialogTitle">
+      <div class="theme-dialog-head">
+        <div>
+          <p class="theme-kicker">PERSONALIZAÇÃO</p>
+          <h2 id="themeDialogTitle">Cores do tema</h2>
+          <p>Arraste os seletores para mudar o site em tempo real. Salve apenas quando gostar do resultado.</p>
+        </div>
+        <button id="themeCloseButton" class="theme-close-button" type="button" aria-label="Fechar">×</button>
+      </div>
+
+      <div class="theme-pickers-grid">
+        <div class="color-picker-card" data-picker="primary">
+          <div class="color-picker-title-row">
+            <div>
+              <span class="color-picker-label">COR PRIMÁRIA</span>
+              <small>Fundo, brilho e bordas principais</small>
+            </div>
+            <div id="primarySwatch" class="theme-swatch"></div>
+          </div>
+          <div class="sv-picker-wrap">
+            <canvas id="primarySvCanvas" class="sv-canvas" width="320" height="210"></canvas>
+            <span id="primarySvHandle" class="sv-handle"></span>
+          </div>
+          <div class="hue-picker-wrap">
+            <canvas id="primaryHueCanvas" class="hue-canvas" width="320" height="24"></canvas>
+            <span id="primaryHueHandle" class="hue-handle"></span>
+          </div>
+          <label class="hex-field">HEX<input id="primaryHex" type="text" maxlength="7" spellcheck="false"></label>
+        </div>
+
+        <div class="color-picker-card" data-picker="secondary">
+          <div class="color-picker-title-row">
+            <div>
+              <span class="color-picker-label">COR SECUNDÁRIA</span>
+              <small>Contraste, gradientes e detalhes</small>
+            </div>
+            <div id="secondarySwatch" class="theme-swatch"></div>
+          </div>
+          <div class="sv-picker-wrap">
+            <canvas id="secondarySvCanvas" class="sv-canvas" width="320" height="210"></canvas>
+            <span id="secondarySvHandle" class="sv-handle"></span>
+          </div>
+          <div class="hue-picker-wrap">
+            <canvas id="secondaryHueCanvas" class="hue-canvas" width="320" height="24"></canvas>
+            <span id="secondaryHueHandle" class="hue-handle"></span>
+          </div>
+          <label class="hex-field">HEX<input id="secondaryHex" type="text" maxlength="7" spellcheck="false"></label>
+        </div>
+      </div>
+
+      <div class="theme-preview-strip">
+        <span>Prévia</span>
+        <div id="themeGradientPreview" class="theme-gradient-preview"></div>
+      </div>
+
+      <div class="theme-dialog-actions">
+        <button id="themeResetButton" type="button">Restaurar padrão</button>
+        <div class="theme-dialog-actions-right">
+          <button id="themeCancelButton" type="button">Cancelar</button>
+          <button id="themeSaveButton" class="primary" type="button">Salvar tema</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js?v=player-forge-v732"></script>
+</body>
+</html>

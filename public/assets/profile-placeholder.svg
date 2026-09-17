@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#111317"/>
+  <circle cx="256" cy="190" r="92" fill="#30343a"/>
+  <path d="M92 470c14-112 75-172 164-172s150 60 164 172" fill="#30343a"/>
+  <circle cx="256" cy="256" r="238" fill="none" stroke="#555b64" stroke-width="8" stroke-dasharray="20 14" opacity=".55"/>
+  <text x="256" y="486" text-anchor="middle" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="#737a84">PLAYER FORGE</text>
+</svg>
